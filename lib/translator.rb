@@ -2,36 +2,30 @@
 require 'pry'
 require 'yaml'
 
-
-
 def load_library(path)
-  emoticons = {"get_meaning" => {}, "get_emoticon" => {}}
-  YAML.load_file(path).each do |meaning, describe|
-     eng, jan = describe
-     emoticons["get_meaning"][jan] = meaning
-     emoticons["get_emoticon"][eng] = jan
-  end
-  emoticons
+  YAML.load_file(path).transform_values{|v| {english: v[0], japanese: v[1]}}
 end
-
 
 def get_japanese_emoticon(path, emoticon)
   emoticons = load_library(path)
-  result = emoticons["get_emoticon"][emoticon]
-  if result
-    result
-  else
-    "Sorry, that emoticon was not found"
-  end
-end
 
+  emoticons.each do |meaning, translations|
+    if translations[:english] == emoticon
+      return translations[:japanese]
+    end
+  end
+
+  'Sorry, that emoticon was not found'
+end
 
 def get_english_meaning(path, emoticon)
   emoticons = load_library(path)
-  result = emoticons["get_meaning"][emoticon]
-  if result
-    result
-  else
-    "Sorry, that emoticon was not found"
+
+  emoticons.each do |meaning, translations|
+    if translations[:japanese] == emoticon
+      return meaning
+    end
   end
+
+  'Sorry, that emoticon was not found'
 end
